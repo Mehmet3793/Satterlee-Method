@@ -1,0 +1,129 @@
+---
+title: "Load Velocity Data"
+author: "Mehmet Arslan"
+header-includes:
+  - \usepackage{gensymb}
+date: "5/31/2021"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r, message = FALSE}
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(ggdark)
+library(ggrepel)
+
+```
+
+The following load velocity data was from the most recent range trip, 5/24/2021. The weather conditions were identical throughout the day, albeit with some headwinds and increasing temperatures. Weather conditions, and the equipment used to gather these data are as follows:
+
+\begin{itemize}
+  \item Weather: $72\degree F$
+  \item Humidity: $74\%$
+  \item Pressure: $30.26inHg.$
+  \item Barrel: $20 in.$ LaRue Stealth Barrel.
+  \item Magazine: Magpul PMAG $20 rnd.$ magazine.
+  \item BCG: PSA Premium BCG.
+\end{itemize}
+
+\newpage
+
+**Sellier & Bellot 5.56mm 77gr. HPBT Projectiles**
+
+\begin{itemize}
+ \item BATCH: Unknown/Unable to tell
+ \item DATE: 03/21
+ \item LOT: 2888
+\end{itemize}
+
+```{r, message = FALSE}
+
+sb_77 = read_csv("sellier & bellot 77 grain load data.csv")
+
+sb_77 %>% ggplot(aes(Shot, Velocity)) + 
+  geom_point(color = "gold") + 
+  geom_line(color = "gold") + 
+  geom_text_repel(aes(label = Velocity, col = Velocity), nudge_y = -0.70, nudge_x = -0.2) + 
+  geom_text_repel(aes(label = Shot), nudge_x = 0.3, color = "white") + 
+  labs(title = "Velocity of S&B 77gr. ", y = "Velocity (in fps.)", x = "Shot") + 
+  dark_theme_gray()
+
+summary(sb_77)
+
+#The variance is so small, in terms of raw numbers, that R can not display them properly. 
+#As such, I will calculate the variance manually using the fastest and lowest velocities.
+
+(variance_sb77 = 2838-2765) #this readout is in fps. 
+
+```
+
+I found the easiest way to read the data more effectively. I flipped the axes to make the connections between shot numbers and velocity a little more apparent. This was also the missing link in the Satterlee Method. From the readouts above using the summary function, I noticed that the velocities ranged from $2765fps. - 2838fps.$ with mean velocity being $2802fps.$ Max variation between this particular load is $73 fps.$ Too little raw data was collected to make more meaningful results. 
+
+*NOTE: This might have been the result of an ice cold bore.*
+
+\newpage
+
+**IMI Systems MK 262 MOD 1 Clone **
+
+\begin{itemize}
+  \item BATCH: Unknown/Unable to tell.
+  \item DATE: Unknown/Unable to tell.
+  \item LOT: 00234/B.
+\end{itemize}
+
+```{r, message = FALSE}
+
+MK_262_clone = read_csv("IMI systems MK 262 MOD 1 clone data.csv")
+
+MK_262_clone %>% ggplot(aes(x = Shot, y = Velocity)) + 
+  geom_point(color = "gold") + 
+  geom_line(color = "gold") + 
+  geom_text_repel(aes(label = Velocity, col = Velocity), nudge_y = 1.99, nudge_x = 0.29) + 
+  geom_text_repel(aes(label = Shot), color = "white", nudge_y = -0.7, nudge_x = -0.2) + 
+  labs(title = "Velocity of IMI Systems' MK 262 MOD 1 Clone", x = "Shot", 
+       y = "Velocity (in fps.)") + 
+  dark_theme_gray()
+
+summary(MK_262_clone)
+
+(variance_MK_262 = 2769-2712) #this readout is in fps. 
+
+```
+
+**77gr. SMK Loads Utilizing the Satterlee Method**
+
+\begin{itemize}
+  \item BATCH: 1
+  \item DATE: 05/20/21
+  \item LOT: Unknown/unable to tell.
+  \item Powder Charge: Varying from $23.1gr.$ to $24.0gr$.
+\end{itemize}
+
+```{r, message = FALSE}
+
+SMK_77 = read_csv("SMK 77gr Loads.csv")
+
+SMK_77 %>% ggplot(aes(x = `Powder Charge`, y = Velocity)) + 
+  geom_point(color = "red") +
+  geom_line(color = "black") + 
+  geom_text_repel(aes(label = Velocity), color = "blue", nudge_y = 1.8, nudge_x = 0.03) +
+  scale_x_continuous(breaks = seq(23.0, 24.0, 0.1)) + 
+  labs(title = "Velocity of 77gr. SMK Loads", x = "Powder Charge (in grains.)", 
+       y = "Velocity (in fps.)") + 
+  theme_bw()
+  
+
+
+ggsave("smk_77gr_loads.pdf", width = 11, height = 8.5, units = c("in"))
+
+summary(SMK_77) #velocity readouts are all in fps. 
+
+```
+
+Having done some more research on the internet about the Satterlee Method, I discovered that it was best to have the powder charge, in grains, be along the $x-axis$ and the $y-axis$ be the velocity readings in fps. The Satterlee Method serves to identify the correlation between powder charge and velocity anyways. The other charts are just there to have as reference, so they can simply be plotted as velocity vs. shot. Having made the changes to this graph, I the aforementioned nodes are *far* easier to identify. But the data doesn't lie, loads 8, 9, 10 performed extremely well and my recommendation is to use either load 8 or load 10 for the $77gr.$ SMK projectiles.
+
+*NOTE: All velocity data was gathered using a LaRue Tactical $20"$ Stealth Barrel.
